@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres-bd2
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: bd2_demo
+      POSTGRES_USER: bd2_user
+      POSTGRES_PASSWORD: UserPass123!
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

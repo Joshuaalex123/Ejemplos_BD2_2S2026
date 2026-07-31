@@ -1,0 +1,19 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: banco_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: banco_ejemplo
+      MYSQL_USER: banco_user
+      MYSQL_PASSWORD: banco_pass
+      TZ: UTC
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./Transacciones.sql:/docker-entrypoint-initdb.d/Transacciones.sql:ro
+
+volumes:
+  mysql_data:
