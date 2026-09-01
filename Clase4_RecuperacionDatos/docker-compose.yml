@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: backups
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ejemplo3clase3
+      MYSQL_DATABASE: tienda_online
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command:
+      - "--server-id=1"
+      - "--log-bin=mysql-bin"
+      - "--binlog-format=ROW"
+
+volumes:
+  mysql_data:
