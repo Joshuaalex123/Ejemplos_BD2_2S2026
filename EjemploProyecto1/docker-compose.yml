@@ -1,0 +1,90 @@
+services:
+
+  cassandra-node1:
+    image: cassandra:4.1
+    container_name: cassandra-node1
+    ports:
+      - "9042:9042"       # Puerto principal para conectar scripts Python
+    environment:
+      - CASSANDRA_CLUSTER_NAME=CoworkingCluster
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_SEEDS=cassandra-node1
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=64M
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 60s
+    volumes:
+      - cassandra-data1:/var/lib/cassandra
+    networks:
+      - cassandra-net
+
+  cassandra-node2:
+    image: cassandra:4.1
+    container_name: cassandra-node2
+    ports:
+      - "9043:9042"       # Puerto alternativo para conectar desde el host
+    environment:
+      - CASSANDRA_CLUSTER_NAME=CoworkingCluster
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_SEEDS=cassandra-node1
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=64M
+    depends_on:
+      cassandra-node1:
+        condition: service_healthy   # Espera que node1 esté completamente listo
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 60s
+    volumes:
+      - cassandra-data2:/var/lib/cassandra
+    networks:
+      - cassandra-net
+
+  cassandra-node3:
+    image: cassandra:4.1
+    container_name: cassandra-node3
+    ports:
+      - "9044:9042"       # Puerto alternativo para conectar desde el host
+    environment:
+      - CASSANDRA_CLUSTER_NAME=CoworkingCluster
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_SEEDS=cassandra-node1
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=64M
+    depends_on:
+      cassandra-node2:
+        condition: service_healthy   # Espera que node2 esté listo
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 60s
+    volumes:
+      - cassandra-data3:/var/lib/cassandra
+    networks:
+      - cassandra-net
+
+# Volúmenes persistentes
+volumes:
+  cassandra-data1:
+  cassandra-data2:
+  cassandra-data3:
+
+# Red interna dedicada para que los nodos se comuniquen entre sí
+networks:
+  cassandra-net:
+    driver: bridge
